@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+    <title>Lab 1 Kristian Åkerblom</title>
+</head>
+<body>
+    <div style="text-align: center;">
+        <h3 style="margin-bottom: 5px;">User List</h3>
+        <table id="users_table"></table>
+    </div>
+    <div style="border: 1px solid; border-radius: 10px; padding: 15px; margin-left: 50px; margin-right: 50px; text-align: center;">
+        <div style="display: none; border: 1px solid; border-radius: 10px; margin: 32px; width:0px;">
+            <p id="status_text"></p>
+        </div>
+        <form id="create_form">
+            <h4>Create account</h4>
+            <input type="text" name="id" placeholder="ID" id="create_id">
+            <input type="text" name="name" placeholder="Name" id="create_name">
+            <input type="text" name="age" placeholder="Age" id="create_age">
+            <input type="submit" value="Create">
+        </form>
+    </div>
+    
+</body>
+<script src="./app.js"></script>
+</html>
