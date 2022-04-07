@@ -1,4 +1,6 @@
-var selectedUser = null;
+var selectedUser = {};
+
+const statusText = document.querySelector("#status_text");
 
 const createForm = document.querySelector("#create_form");
 const createId = document.querySelector("#create_id");
@@ -23,14 +25,13 @@ createForm.addEventListener("submit", (e) => {
     .then((res) => res.json())
     .then((data) => {
       if (data.error) {
-        console.log(data.error);
+        console.log(data.error)
         updateStatus(data.error);
       } else {
-        console.log(data);
         createId.value = "";
         createName.value = "";
         createAge.value = "";
-        updateStatus(`User ${data.name} created successfully`);
+        updateStatus(data.message);
         updateTable();
       }
     })
@@ -51,7 +52,7 @@ function deleteUser(id) {
         updateStatus(data.error);
       } else {
         console.log(data);
-        updateStatus(`User with id ${id} deleted successfully`);
+        updateStatus(data.message);
         updateTable();
       }
     })
@@ -68,12 +69,13 @@ function updateUser(replaceid , userDetails) {
   })
     .then((res) => res.json())
     .then((data) => {
+      // if status code is not 200 
       if (data.error) {
         console.log(data.error);
         updateStatus(data.error);
       } else {
         console.log(data);
-        updateStatus(`User ${data.name} updated successfully`);
+        updateStatus();
         updateTable();
       }
     })
@@ -81,13 +83,15 @@ function updateUser(replaceid , userDetails) {
 }
 
 function updateStatus(message) {
-    const statusText = document.getElementById("status_text");
-    if (statusText === null) {
-        statusText.style.display = "none";
-    } else {
-        statusText.style.display = "block";
-        statusText.innerHTML = message;
-    }
+  if (!message) {
+    statusText.innerHTML = "";
+    statusText.style.display = "none";
+  } else {
+    statusText.innerHTML = `<p>${message}</p>`;
+    statusText.style.display = "block";
+    statusText.style.width = "fit-content";
+    statusText.style.backgroundColor = "rgba(255,0,0,0.2)";
+  }
 }
 
 const UsersTable = document.querySelector("#users_table");
@@ -100,6 +104,52 @@ UsersTable.innerHTML = `
         </td>
     </tr>
 `;
+
+async function fetchUser(id) {
+  return fetch("/api/users/" + id)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.error) {
+        console.log(data.error);
+      } else {
+        console.log(data);
+        return data;
+      }
+    })
+    .catch((err) => console.log(err));
+}
+
+const showDetails = document.querySelector("#show_details");
+
+function closeDetails() {
+  showDetails.innerHTML = "";
+  showDetails.style.display = "none";
+}
+
+async function showDetailsUser(id) {
+  selectedUser = await fetchUser(id);
+  const selectedUserRow = document.querySelector(`tr[data-id="${id}"]`);
+  showDetails.innerHTML = `
+  <a href="#" class="close" onclick="closeDetails()" style="float:right; margin-top:0px;">&times;</a>
+    <tr>
+        <td> User ID: ${selectedUser.id} <br></td>
+        <td> User Name: ${selectedUser.name} <br></td>
+        <td> User Age: ${selectedUser.age} <br></td>
+        <td> User Created At: ${selectedUser.date} <br></td>
+        <td> User _ID: ${selectedUser._id} <br></td>
+    </tr>
+  `;
+  selectedUserRow.style.backgroundColor = "rgb(255, 255, 255, 0.2)";
+  // reset all other rows
+  const allRows = document.querySelectorAll("tr");
+  allRows.forEach((row) => {  
+    if (row.dataset.id != id) {
+      row.style.backgroundColor = "";
+    }
+  });
+  showDetails.style.display = "block";
+
+}
 
 const updateTable = () => {
   fetch("/api/users")
@@ -122,9 +172,10 @@ const updateTable = () => {
                             <td>${user.id}</td>
                             <td>${user.name}</td>
                             <td>${user.age}</td>
-                            <td style="text-align:center;">
+                            <td>
                                 <button class="btn btn-danger" onclick="selectUser('${user.id}')">Update</button>
                                 <button class="btn btn-danger" onclick="deleteUser('${user.id}')">Delete</button>
+                                <button class="btn btn-danger" onclick="showDetailsUser('${user.id}')">Show Details</button>
                             </td>
                         </tr>
                     `;
@@ -139,11 +190,12 @@ const selectUser = (id) => {
   selectedUser = id;
   const selectedUserRow = document.querySelector(`tr[data-id="${id}"]`);
   selectedUserRow.innerHTML = `
-        <td style="width:100px;"><input type="text" id="update_id" value="${id}"></td>
-        <td><input type="text" id="update_name" value="${selectedUserRow.children[1].innerHTML}"></td>
-        <td><input type="text" id="update_age" value="${selectedUserRow.children[2].innerHTML}"></td>
+        <td style="width:100px;"><input type="text" id="update_id" value="${id}" style="margin-bottom:0px;"></td>
+        <td><input type="text" id="update_name" value="${selectedUserRow.children[1].innerHTML}" style="margin-bottom:0px;"></td>
+        <td><input type="text" id="update_age" value="${selectedUserRow.children[2].innerHTML}" style="margin-bottom:0px;"></td>
         <td>
-            <button class="btn btn-danger" onclick="updateUser('${id}', {id: '${id}', name: document.querySelector('#update_name').value, age: document.querySelector('#update_age').value})">Update</button>
+            <button class="btn btn-danger" onclick="updateUser('${id}', {id: '${id}', name: document.querySelector('#update_name').value, age: document.querySelector('#update_age').value})">Confirm</button>
+            <button class="btn btn-danger" onclick="updateTable()">Cancel</button>
         </td>
     `;
 };
