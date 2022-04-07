@@ -9,7 +9,6 @@ const createAge = document.querySelector("#create_age");
 
 createForm.addEventListener("submit", (e) => {
   e.preventDefault();
-  console.log(createId.value, createName.value, createAge.value);
   const userDetails = {
     id: createId.value,
     name: createName.value,
@@ -69,7 +68,6 @@ function updateUser(replaceid , userDetails) {
   })
     .then((res) => res.json())
     .then((data) => {
-      // if status code is not 200 
       if (data.error) {
         console.log(data.error);
         updateStatus(data.error);
